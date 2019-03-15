@@ -1,3 +1,3 @@
-# Utilities-MonoGfx
+# MonoGfx
 
 Module for monochromatic graphics
