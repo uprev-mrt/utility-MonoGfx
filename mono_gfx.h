@@ -9,8 +9,8 @@
 #include "Platforms/Common/mrt_platform.h"
 
 struct mono_gfx_struct;
-typedef mrt_status_t (*mono_gfx_write)(struct mono_gfx_struct* gfx, uint16_t x, uint16_t y, uint8_t* data, int len); //pointer to write function
-typedef mrt_status_t (*mono_gfx_read)(struct mono_gfx_struct* gfx, uint16_t x, uint16_t y, uint8_t* data, int len); //pointer to write function
+typedef mrt_status_t (*mono_gfx_write)(struct mono_gfx_struct* gfx, uint16_t x, uint16_t y, uint8_t* data, int len, bool wrap); //pointer to write function
+typedef mrt_status_t (*mono_gfx_read)(struct mono_gfx_struct* gfx, uint16_t x, uint16_t y, uint8_t* data, int len, bool wrap); //pointer to write function
 
 typedef struct{
 	uint8_t* data;

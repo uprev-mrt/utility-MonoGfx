@@ -98,7 +98,7 @@ mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, uint16_t x, uint16_t y, GFXBmp* 
   uint32_t bmpIdx = 0;
   for(int i=0; i < bmp->height; i ++)
   {
-    gfx->fWritePixels(dev, x,y, &bmp->data[bmpIdx], bmp->width, false);
+    gfx->fWritePixels(gfx, x,y, &bmp->data[bmpIdx], bmp->width, false);
     bmpIdx += bmp->width;
   }
   return MRT_STATUS_OK;
@@ -138,7 +138,7 @@ mrt_status_t mono_gfx_print(mono_gfx_t* gfx, uint16_t x, uint16_t y, const char 
       bmp.height = glyph->height;
 
       //draw the character
-      mono_gfx_draw_bmp(dev, xx + glyph->xOffset, yy + glyph->yOffset, &bmp, color );
+      mono_gfx_draw_bmp(gfx, xx + glyph->xOffset, yy + glyph->yOffset, &bmp );
       xx += glyph->xOffset + glyph->xAdvance;
     }
 
