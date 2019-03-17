@@ -9,17 +9,17 @@
 #include "Platforms/Common/mrt_platform.h"
 
 struct mono_gfx_struct;
-typedef mrt_status_t (*mono_gfx_write)(struct mono_gfx_struct* gfx, uint16_t x, uint16_t y, uint8_t* data, int len, bool wrap); //pointer to write function
-typedef mrt_status_t (*mono_gfx_read)(struct mono_gfx_struct* gfx, uint16_t x, uint16_t y, uint8_t* data, int len, bool wrap); //pointer to write function
+typedef mrt_status_t (*mono_gfx_write)(struct mono_gfx_struct* gfx, int x, int y, uint8_t* data, int len, bool wrap); //pointer to write function
+typedef mrt_status_t (*mono_gfx_read)(struct mono_gfx_struct* gfx, int x, int y, uint8_t* data, int len, bool wrap); //pointer to write function
 
 typedef struct{
 	uint8_t* data;
-	uint16_t width;
-	uint16_t height;
+	int width;
+	int height;
 }GFXBmp;
 
 typedef struct { // Data stored PER GLYPH
-	uint16_t bitmapOffset;     // Pointer into GFXfont->bitmap
+	int bitmapOffset;     // Pointer into GFXfont->bitmap
 	uint8_t  width, height;    // Bitmap dimensions in pixels
 	uint8_t  xAdvance;         // Distance to advance cursor (x axis)
 	int8_t   xOffset, yOffset; // Dist from cursor pos to UL corner
@@ -34,10 +34,10 @@ typedef struct { // Data stored for FONT AS A WHOLE:
 
 typedef struct mono_gfx_struct{
   uint8_t* mBuffer;						 //buffer to store pixel data
-  uint16_t mWidth;						 // width of buffer in pixels
-  uint16_t mHeight;							//height of buffer in pixels
+  int mWidth;						 // width of buffer in pixels
+  int mHeight;							//height of buffer in pixels
   uint32_t mBufferSize;					//size of buffer (in bytes)
-	GFXfont* mFont;       				//font to use for printing
+	const GFXfont* mFont;       				//font to use for printing
   mono_gfx_write fWritePixels; //pointer to write function
 	void* mDevice;								//void pointer to device for unbuffered implementation
 	bool mBuffered;
@@ -50,7 +50,7 @@ typedef struct mono_gfx_struct{
   *@param height height (in pixels) of display buffer
   *@return status
   */
-mrt_status_t mono_gfx_init_buffered(mono_gfx_t* gfx, uint16_t width, uint16_t height);
+mrt_status_t mono_gfx_init_buffered(mono_gfx_t* gfx, int width, int height);
 
 /**
   *@brief initializes a mono_gfx_t that does not manage its own buffer. This is used for large displays where storing the buffer locally doesnt make sense
@@ -61,7 +61,9 @@ mrt_status_t mono_gfx_init_buffered(mono_gfx_t* gfx, uint16_t width, uint16_t he
 	*@param dev void ptr to device (used as )
   *@return status
   */
-mrt_status_t mono_gfx_init_unbuffered(mono_gfx_t* gfx, uint16_t width, uint16_t height, mono_gfx_write write_cb, void* dev );
+mrt_status_t mono_gfx_init_unbuffered(mono_gfx_t* gfx, int width, int height, mono_gfx_write write_cb, void* dev );
+
+mrt_status_t mono_gfx_write_pixel(mono_gfx_t* gfx, int x, int y, uint8_t val);
 
 /**
   *@brief writes an array of bytes to the buffer
@@ -71,7 +73,7 @@ mrt_status_t mono_gfx_init_unbuffered(mono_gfx_t* gfx, uint16_t width, uint16_t 
   *@param wrap whether or not to wrap when we reach the end of current row
   *@return status of operation
   */
-mrt_status_t mono_gfx_write_buffer(mono_gfx_t* gfx, uint16_t x, uint16_t y, uint8_t* data, int len, bool wrap);
+mrt_status_t mono_gfx_write_buffer(mono_gfx_t* gfx, int x, int y, uint8_t* data, int len, bool wrap);
 
 /**
   *@brief Draws a bitmap to the buffer
@@ -81,7 +83,7 @@ mrt_status_t mono_gfx_write_buffer(mono_gfx_t* gfx, uint16_t x, uint16_t y, uint
   *@param bmp bitmap to draw
   *@return status of operation
   */
-mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, uint16_t x, uint16_t y, GFXBmp* bmp);
+mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y, GFXBmp* bmp);
 
 /**
   *@brief Draws rendered text to the buffer
@@ -91,7 +93,18 @@ mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, uint16_t x, uint16_t y, GFXBmp* 
   *@param text text to be written
   *@return status of operation
   */
-mrt_status_t mono_gfx_print(mono_gfx_t* gfx, uint16_t x, uint16_t y, const char * text);
+mrt_status_t mono_gfx_print(mono_gfx_t* gfx, int x, int y, const char * text);
+
+/**
+  *@brief draws a rectangle
+  *@param gfx ptr to gfx canvas
+	*@param x x coord to begin drawing at
+  *@param y y coord to begin drawing at
+	*@param w width
+  *@param h height
+  *@return "Return of the function"
+  */
+mrt_status_t mono_gfx_draw_rect(mono_gfx_t* gfx, int x, int y, int w, int h);
 
 /**
   *@brief fill buffer with value

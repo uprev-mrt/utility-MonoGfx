@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 
-mrt_status_t mono_gfx_init_buffered(mono_gfx_t* gfx, uint16_t width, uint16_t height)
+mrt_status_t mono_gfx_init_buffered(mono_gfx_t* gfx, int width, int height)
 {
   gfx->mBufferSize = (width * height)/8;
   gfx->mBuffer = (uint8_t*) malloc(gfx->mBufferSize);
@@ -25,7 +25,7 @@ mrt_status_t mono_gfx_init_buffered(mono_gfx_t* gfx, uint16_t width, uint16_t he
 }
 
 
-mrt_status_t mono_gfx_init_unbuffered(mono_gfx_t* gfx, uint16_t width, uint16_t height, mono_gfx_write write_cb, void* dev )
+mrt_status_t mono_gfx_init_unbuffered(mono_gfx_t* gfx, int width, int height, mono_gfx_write write_cb, void* dev )
 {
   gfx->mBufferSize = (width * height)/8;
   gfx->mBuffer = NULL;
@@ -39,8 +39,30 @@ mrt_status_t mono_gfx_init_unbuffered(mono_gfx_t* gfx, uint16_t width, uint16_t 
   return MRT_STATUS_OK;
 }
 
+mrt_status_t mono_gfx_write_pixel(mono_gfx_t* gfx, int x, int y, uint8_t val)
+{
+  if(( x < 0) || (x >= gfx->mWidth) || (y < 0) || (y>= gfx->mHeight))
+    return MRT_STATUS_OK;
 
-mrt_status_t mono_gfx_write_buffer(mono_gfx_t* gfx, uint16_t x, uint16_t y, uint8_t* data, int len, bool wrap)
+    uint32_t cursor = (y * gfx->mWidth) + x;
+    uint8_t mask = 0x01;
+
+    //get number of bits off of alignment in case we are not writing on a byte boundary
+    uint32_t byteOffset = (cursor  / 8);
+    uint8_t bitOffset = cursor % 8;
+    mask = mask << bitOffset;
+
+    if( val == 0)
+      gfx->mBuffer[byteOffset] &= (~mask);
+    else
+      gfx->mBuffer[byteOffset] |= mask;
+
+    return MRT_STATUS_OK;
+
+}
+
+
+mrt_status_t mono_gfx_write_buffer(mono_gfx_t* gfx, int x, int y, uint8_t* data, int len, bool wrap)
 {
   uint32_t cursor = (y * gfx->mWidth) + x;
 
@@ -93,27 +115,35 @@ mrt_status_t mono_gfx_write_buffer(mono_gfx_t* gfx, uint16_t x, uint16_t y, uint
 }
 
 
-mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, uint16_t x, uint16_t y, GFXBmp* bmp)
+mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y, GFXBmp* bmp)
 {
   uint32_t bmpIdx = 0;
+
+  uint8_t mask =1;
+  int bit =0;
+
   for(int i=0; i < bmp->height; i ++)
   {
-    gfx->fWritePixels(gfx, x,y, &bmp->data[bmpIdx], bmp->width, false);
-    bmpIdx += bmp->width;
+    for(int a=0; a < bmp->width; a++)
+    {
+      bit = a %8;
+      mono_gfx_write_pixel(gfx, x+a, y+i, ((bmp->data[bmpIdx/8] >> bit) & mask));
+      bmpIdx ++;//= bmp->width;
+    }
   }
   return MRT_STATUS_OK;
 }
 
 
-mrt_status_t mono_gfx_print(mono_gfx_t* gfx, uint16_t x, uint16_t y, const char * text)
+mrt_status_t mono_gfx_print(mono_gfx_t* gfx, int x, int y, const char * text)
 {
 
   //if a font has not been set, return error
   if(gfx->mFont == NULL)
     return MRT_STATUS_ERROR;
 
-  uint16_t xx =x;     //current position for writing
-  uint16_t yy = y;
+  int xx =x;     //current position for writing
+  int yy = y;
   GFXglyph* glyph;    //pointer to glyph for current character
   GFXBmp bmp;         //bitmap struct used to draw glyph
   char c = *text++;   //grab first character from string
@@ -145,6 +175,19 @@ mrt_status_t mono_gfx_print(mono_gfx_t* gfx, uint16_t x, uint16_t y, const char 
 
     //get next character
     c = *text++;
+  }
+
+  return MRT_STATUS_OK;
+}
+
+mrt_status_t mono_gfx_draw_rect(mono_gfx_t* gfx, int x, int y, int w, int h)
+{
+  for(int i=0; i < h; i++)
+  {
+    for(int a=0; a < w; a++)
+    {
+      mono_gfx_write_pixel(gfx,x+a, y+i, 1);
+    }
   }
 
   return MRT_STATUS_OK;
