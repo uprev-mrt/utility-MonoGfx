@@ -14,6 +14,7 @@ mrt_status_t mono_gfx_init_buffered(mono_gfx_t* gfx, int width, int height)
 {
   gfx->mBufferSize = (width * height)/8;
   gfx->mBuffer = (uint8_t*) malloc(gfx->mBufferSize);
+  memset(gfx->mBuffer,0,gfx->mBufferSize);
   gfx->mWidth = width;
   gfx->mHeight = height;
   gfx->mFont  = NULL;
@@ -45,12 +46,12 @@ mrt_status_t mono_gfx_write_pixel(mono_gfx_t* gfx, int x, int y, uint8_t val)
     return MRT_STATUS_OK;
 
     uint32_t cursor = (y * gfx->mWidth) + x;
-    uint8_t mask = 0x01;
+    uint8_t mask = 0x80;
 
     //get number of bits off of alignment in case we are not writing on a byte boundary
     uint32_t byteOffset = (cursor  / 8);
     uint8_t bitOffset = cursor % 8;
-    mask = mask << bitOffset;
+    mask = mask >> bitOffset;
 
     if( val == 0)
       gfx->mBuffer[byteOffset] &= (~mask);
@@ -119,17 +120,19 @@ mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y, GFXBmp* bmp)
 {
   uint32_t bmpIdx = 0;
 
-  uint8_t mask =1;
+  uint8_t mask =0x80;
   int bit =0;
+  int i,a;
 
-  for(int i=0; i < bmp->height; i ++)
+  for(i=0; i < bmp->height; i ++)
   {
-    for(int a=0; a < bmp->width; a++)
+    for(a=0; a < bmp->width; a++)
     {
       bit = a %8;
-      mono_gfx_write_pixel(gfx, x+a, y+i, ((bmp->data[bmpIdx/8] >> bit) & mask));
-      bmpIdx ++;//= bmp->width;
+      mono_gfx_write_pixel(gfx, x+a, y+i, ((bmp->data[bmpIdx/8] << bit) & mask));
+      bmpIdx ++;
     }
+
   }
   return MRT_STATUS_OK;
 }
@@ -164,8 +167,8 @@ mrt_status_t mono_gfx_print(mono_gfx_t* gfx, int x, int y, const char * text)
 
       //map glyph to a bitmap that we can draw
       bmp.data = &gfx->mFont->bitmap[glyph->bitmapOffset];
-      bmp.width = glyph->width;
-      bmp.height = glyph->height;
+      bmp.width = glyph->width ;
+      bmp.height = glyph->height ;
 
       //draw the character
       mono_gfx_draw_bmp(gfx, xx + glyph->xOffset, yy + glyph->yOffset, &bmp );
