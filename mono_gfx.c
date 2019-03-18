@@ -9,6 +9,18 @@
 #include "string.h"
 #include <stdlib.h>
 
+#ifndef _swap_int
+#define _swap_int(a, b) { int t = a; a = b; b = t; }
+#endif
+
+// #ifndef min
+// #define min(a,b) (((a) < (b)) ? (a) : (b))
+// #endif
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 mrt_status_t mono_gfx_init_buffered(mono_gfx_t* gfx, int width, int height)
 {
@@ -18,7 +30,7 @@ mrt_status_t mono_gfx_init_buffered(mono_gfx_t* gfx, int width, int height)
   gfx->mWidth = width;
   gfx->mHeight = height;
   gfx->mFont  = NULL;
-  gfx->fWritePixels = &mono_gfx_write_buffer;
+  gfx->fWritePixel = &mono_gfx_write_pixel;
   gfx->mDevice  = NULL;
   gfx->mBuffered = true;
 
@@ -26,16 +38,31 @@ mrt_status_t mono_gfx_init_buffered(mono_gfx_t* gfx, int width, int height)
 }
 
 
-mrt_status_t mono_gfx_init_unbuffered(mono_gfx_t* gfx, int width, int height, mono_gfx_write write_cb, void* dev )
+mrt_status_t mono_gfx_init_unbuffered(mono_gfx_t* gfx, int width, int height, f_mono_gfx_write_pixel write_cb, void* dev )
 {
   gfx->mBufferSize = (width * height)/8;
   gfx->mBuffer = NULL;
   gfx->mWidth = width;
   gfx->mHeight = height;
   gfx->mFont  = NULL;
-  gfx->fWritePixels = &write_cb;
+  gfx->fWritePixel = write_cb;
   gfx->mDevice  = dev;
   gfx->mBuffered = false;
+
+  return MRT_STATUS_OK;
+}
+
+mrt_status_t mono_gfx_deinit(mono_gfx_t* gfx)
+{
+    gfx->mBufferSize = 0;
+    gfx->mWidth =0;
+    gfx->mHeight = 0;
+
+  //if the gfx object manages its own buffer, free it from memory
+  if(gfx->mBuffered)
+  {
+    free(gfx->mBuffer);
+  }
 
   return MRT_STATUS_OK;
 }
@@ -129,7 +156,7 @@ mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y, GFXBmp* bmp)
     for(a=0; a < bmp->width; a++)
     {
       bit = a %8;
-      mono_gfx_write_pixel(gfx, x+a, y+i, ((bmp->data[bmpIdx/8] << bit) & mask));
+      gfx->fWritePixel(gfx, x+a, y+i, ((bmp->data[bmpIdx/8] << bit) & mask));
       bmpIdx ++;
     }
 
@@ -183,13 +210,56 @@ mrt_status_t mono_gfx_print(mono_gfx_t* gfx, int x, int y, const char * text)
   return MRT_STATUS_OK;
 }
 
+mrt_status_t mono_gfx_draw_line(mono_gfx_t* gfx, int x0, int y0, int x1, int y1)
+{
+  int16_t steep = abs(y1 - y0) > abs(x1 - x0);
+  int swap;
+  if (steep) {
+      _swap_int(x0, y0);
+      _swap_int(x1, y1);
+  }
+
+  if (x0 > x1) {
+      _swap_int(x0, x1);
+      _swap_int(y0, y1);
+  }
+
+  int16_t dx, dy;
+  dx = x1 - x0;
+  dy = abs(y1 - y0);
+
+  int16_t err = dx / 2;
+  int16_t ystep;
+
+  if (y0 < y1) {
+      ystep = 1;
+  } else {
+      ystep = -1;
+  }
+
+  for (; x0<=x1; x0++) {
+      if (steep) {
+          gfx->fWritePixel(gfx,y0, x0, 1);
+      } else {
+          gfx->fWritePixel(gfx, x0, y0, 1);
+      }
+      err -= dy;
+      if (err < 0) {
+          y0 += ystep;
+          err += dx;
+      }
+  }
+  //TODO implement
+  return MRT_STATUS_OK;
+}
+
 mrt_status_t mono_gfx_draw_rect(mono_gfx_t* gfx, int x, int y, int w, int h)
 {
   for(int i=0; i < h; i++)
   {
     for(int a=0; a < w; a++)
     {
-      mono_gfx_write_pixel(gfx,x+a, y+i, 1);
+      gfx->fWritePixel(gfx,x+a, y+i, 1);
     }
   }
 
@@ -209,3 +279,7 @@ mrt_status_t mono_gfx_fill(mono_gfx_t* gfx, uint8_t val)
   }
   return MRT_STATUS_OK;
 }
+
+#ifdef __cplusplus
+}
+#endif

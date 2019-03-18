@@ -9,8 +9,9 @@
 #include "Platforms/Common/mrt_platform.h"
 
 struct mono_gfx_struct;
-typedef mrt_status_t (*mono_gfx_write)(struct mono_gfx_struct* gfx, int x, int y, uint8_t* data, int len, bool wrap); //pointer to write function
-typedef mrt_status_t (*mono_gfx_read)(struct mono_gfx_struct* gfx, int x, int y, uint8_t* data, int len, bool wrap); //pointer to write function
+typedef mrt_status_t (*f_mono_gfx_write_pixel)(struct mono_gfx_struct* gfx, int x, int y, uint8_t val);
+typedef mrt_status_t (*f_mono_gfx_write)(struct mono_gfx_struct* gfx, int x, int y, uint8_t* data, int len, bool wrap); //pointer to write function
+typedef mrt_status_t (*f_mono_gfx_read)(struct mono_gfx_struct* gfx, int x, int y, uint8_t* data, int len, bool wrap); //pointer to write function
 
 typedef struct{
 	uint8_t* data;
@@ -38,10 +39,16 @@ typedef struct mono_gfx_struct{
   int mHeight;							//height of buffer in pixels
   uint32_t mBufferSize;					//size of buffer (in bytes)
 	const GFXfont* mFont;       				//font to use for printing
-  mono_gfx_write fWritePixels; //pointer to write function
+  f_mono_gfx_write_pixel fWritePixel; //pointer to write function
 	void* mDevice;								//void pointer to device for unbuffered implementation
 	bool mBuffered;
 } mono_gfx_t;
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 
 /**
   *@brief initializes a mono_gfx_t that manages its own buffer
@@ -61,8 +68,22 @@ mrt_status_t mono_gfx_init_buffered(mono_gfx_t* gfx, int width, int height);
 	*@param dev void ptr to device (used as )
   *@return status
   */
-mrt_status_t mono_gfx_init_unbuffered(mono_gfx_t* gfx, int width, int height, mono_gfx_write write_cb, void* dev );
+mrt_status_t mono_gfx_init_unbuffered(mono_gfx_t* gfx, int width, int height, f_mono_gfx_write_pixel write_cb, void* dev );
 
+/**
+  *@brief frees deinitializes gfx object and frees buffer
+  *@param gfx ptr to graphics object
+  */
+mrt_status_t mono_gfx_deinit(mono_gfx_t* gfx);
+
+/**
+  *@brief writes a single pixel on the canvas
+  *@param gfx ptr to gfx object
+	*@param x x coord to draw
+  *@param y y coord to draw
+	*@param val pixel value
+  *@return status
+  */
 mrt_status_t mono_gfx_write_pixel(mono_gfx_t* gfx, int x, int y, uint8_t val);
 
 /**
@@ -98,6 +119,17 @@ mrt_status_t mono_gfx_print(mono_gfx_t* gfx, int x, int y, const char * text);
 /**
   *@brief draws a rectangle
   *@param gfx ptr to gfx canvas
+	*@param x0 x coord of p1
+  *@param y0 y coord of p1
+	*@param x1 x coord of p2
+  *@param y1 y coord of p2
+  *@return "Return of the function"
+  */
+mrt_status_t mono_gfx_draw_line(mono_gfx_t* gfx, int x0, int y0, int x1, int y1);
+
+/**
+  *@brief draws a rectangle
+  *@param gfx ptr to gfx canvas
 	*@param x x coord to begin drawing at
   *@param y y coord to begin drawing at
 	*@param w width
@@ -113,3 +145,7 @@ mrt_status_t mono_gfx_draw_rect(mono_gfx_t* gfx, int x, int y, int w, int h);
   *@return status of operation
   */
 mrt_status_t mono_gfx_fill(mono_gfx_t* gfx, uint8_t val);
+
+#ifdef __cplusplus
+}
+#endif
