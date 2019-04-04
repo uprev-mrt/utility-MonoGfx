@@ -143,7 +143,7 @@ mrt_status_t mono_gfx_write_buffer(mono_gfx_t* gfx, int x, int y, uint8_t* data,
 }
 
 
-mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y, GFXBmp* bmp)
+mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y,const GFXBmp* bmp)
 {
   uint32_t bmpIdx = 0;
 

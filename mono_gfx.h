@@ -14,7 +14,7 @@ typedef mrt_status_t (*f_mono_gfx_write)(struct mono_gfx_struct* gfx, int x, int
 typedef mrt_status_t (*f_mono_gfx_read)(struct mono_gfx_struct* gfx, int x, int y, uint8_t* data, int len, bool wrap); //pointer to write function
 
 typedef struct{
-	uint8_t* data;
+	const uint8_t* data;
 	int width;
 	int height;
 }GFXBmp;
@@ -104,7 +104,7 @@ mrt_status_t mono_gfx_write_buffer(mono_gfx_t* gfx, int x, int y, uint8_t* data,
   *@param bmp bitmap to draw
   *@return status of operation
   */
-mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y, GFXBmp* bmp);
+mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y,const GFXBmp* bmp);
 
 /**
   *@brief Draws rendered text to the buffer
