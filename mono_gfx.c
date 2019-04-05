@@ -146,7 +146,6 @@ mrt_status_t mono_gfx_write_buffer(mono_gfx_t* gfx, int x, int y, uint8_t* data,
 mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y,const GFXBmp* bmp)
 {
   uint32_t bmpIdx = 0;
-
   uint8_t mask =0x80;
   int bit =0;
   int i,a;
@@ -155,9 +154,11 @@ mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y,const GFXBmp* bmp)
   {
     for(a=0; a < bmp->width; a++)
     {
-      bit = a %8;
       gfx->fWritePixel(gfx, x+a, y+i, ((bmp->data[bmpIdx/8] << bit) & mask));
       bmpIdx ++;
+      bit++;
+      if(bit == 8)
+        bit =0;
     }
 
   }
@@ -198,7 +199,7 @@ mrt_status_t mono_gfx_print(mono_gfx_t* gfx, int x, int y, const char * text)
       bmp.height = glyph->height ;
 
       //draw the character
-      mono_gfx_draw_bmp(gfx, xx + glyph->xOffset, yy + glyph->yOffset, &bmp );
+      mono_gfx_draw_bmp(gfx, xx+glyph->xOffset , yy+ glyph->yOffset , &bmp );
       xx += glyph->xOffset + glyph->xAdvance;
     }
 
