@@ -48,7 +48,7 @@
 
 #define TOMTHUMB_USE_EXTENDED 0
 
-const uint8_t TomThumbBitmaps[]  = {
+static const uint8_t TomThumbBitmaps[]  = {
    0x00,                                /* 0x20 space */
    0x80, 0x80, 0x80, 0x00, 0x80,        /* 0x21 exclam */
    0xA0, 0xA0,                          /* 0x22 quotedbl */
@@ -259,7 +259,7 @@ const uint8_t TomThumbBitmaps[]  = {
 
 
 /* {offset, width, height, advance cursor, x offset, y offset} */
-const GFXglyph TomThumbGlyphs[]  = {
+static const GFXglyph TomThumbGlyphs[]  = {
    { 0, 8, 1, 2, 0, -5 },    /* 0x20 space */
    { 1, 8, 5, 2, 0, -5 },    /* 0x21 exclam */
    { 6, 8, 2, 4, 0, -5 },    /* 0x22 quotedbl */
