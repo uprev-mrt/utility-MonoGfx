@@ -254,13 +254,13 @@ mrt_status_t mono_gfx_draw_line(mono_gfx_t* gfx, int x0, int y0, int x1, int y1)
   return MRT_STATUS_OK;
 }
 
-mrt_status_t mono_gfx_draw_rect(mono_gfx_t* gfx, int x, int y, int w, int h)
+mrt_status_t mono_gfx_draw_rect(mono_gfx_t* gfx, int x, int y, int w, int h,  uint8_t val)
 {
   for(int i=0; i < h; i++)
   {
     for(int a=0; a < w; a++)
     {
-      gfx->fWritePixel(gfx,x+a, y+i, 1);
+      gfx->fWritePixel(gfx,x+a, y+i, val);
     }
   }
 

@@ -136,7 +136,7 @@ mrt_status_t mono_gfx_draw_line(mono_gfx_t* gfx, int x0, int y0, int x1, int y1)
   *@param h height
   *@return "Return of the function"
   */
-mrt_status_t mono_gfx_draw_rect(mono_gfx_t* gfx, int x, int y, int w, int h);
+mrt_status_t mono_gfx_draw_rect(mono_gfx_t* gfx, int x, int y, int w, int h, uint8_t val);
 
 /**
   *@brief fill buffer with value
