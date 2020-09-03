@@ -143,7 +143,7 @@ mrt_status_t mono_gfx_write_buffer(mono_gfx_t* gfx, int x, int y, uint8_t* data,
 }
 
 
-mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y,const GFXBmp* bmp)
+mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y,const GFXBmp* bmp, uint8_t val)
 {
   uint32_t bmpIdx = 0;
   uint8_t mask =0x80;
@@ -154,7 +154,8 @@ mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y,const GFXBmp* bmp)
   {
     for(a=0; a < bmp->width; a++)
     {
-      gfx->fWritePixel(gfx, x+a, y+i, ((bmp->data[bmpIdx/8] << bit) & mask));
+      if(((bmp->data[bmpIdx/8] << bit) & mask))
+        gfx->fWritePixel(gfx, x+a, y+i, val);
       bmpIdx ++;
       bit++;
       if(bit == 8)
@@ -166,7 +167,7 @@ mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y,const GFXBmp* bmp)
 }
 
 
-mrt_status_t mono_gfx_print(mono_gfx_t* gfx, int x, int y, const char * text)
+mrt_status_t mono_gfx_print(mono_gfx_t* gfx, int x, int y, const char * text, uint8_t val)
 {
 
   //if a font has not been set, return error
@@ -199,7 +200,7 @@ mrt_status_t mono_gfx_print(mono_gfx_t* gfx, int x, int y, const char * text)
       bmp.height = glyph->height ;
 
       //draw the character
-      mono_gfx_draw_bmp(gfx, xx+glyph->xOffset , yy+ glyph->yOffset , &bmp );
+      mono_gfx_draw_bmp(gfx, xx+glyph->xOffset , yy+ glyph->yOffset , &bmp,val );
       xx += glyph->xOffset + glyph->xAdvance;
     }
 
@@ -211,7 +212,7 @@ mrt_status_t mono_gfx_print(mono_gfx_t* gfx, int x, int y, const char * text)
   return MRT_STATUS_OK;
 }
 
-mrt_status_t mono_gfx_draw_line(mono_gfx_t* gfx, int x0, int y0, int x1, int y1)
+mrt_status_t mono_gfx_draw_line(mono_gfx_t* gfx, int x0, int y0, int x1, int y1, uint8_t val)
 {
   int16_t steep = abs(y1 - y0) > abs(x1 - x0);
   int swap;
@@ -240,9 +241,9 @@ mrt_status_t mono_gfx_draw_line(mono_gfx_t* gfx, int x0, int y0, int x1, int y1)
 
   for (; x0<=x1; x0++) {
       if (steep) {
-          gfx->fWritePixel(gfx,y0, x0, 1);
+          gfx->fWritePixel(gfx,y0, x0, val);
       } else {
-          gfx->fWritePixel(gfx, x0, y0, 1);
+          gfx->fWritePixel(gfx, x0, y0, val);
       }
       err -= dy;
       if (err < 0) {

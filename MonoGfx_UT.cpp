@@ -43,7 +43,7 @@ TEST(MonoGfxTest, rectTest)
 {
     mono_gfx_init_buffered(&canvas, 8,8);
 
-    mono_gfx_draw_rect(&canvas, 1,1,6,6);
+    mono_gfx_draw_rect(&canvas, 1,1,6,6, 1);
 
     for(int i=0; i < canvas.mBufferSize; i++)
     {
@@ -58,7 +58,7 @@ TEST(MonoGfxTest, lineTest)
 {
     mono_gfx_init_buffered(&canvas, 8,8);
 
-    mono_gfx_draw_line(&canvas, 0,0,7,7);
+    mono_gfx_draw_line(&canvas, 0,0,7,7,1);
 
     for(int i=0; i < canvas.mBufferSize; i++)
     {

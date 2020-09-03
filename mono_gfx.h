@@ -8,6 +8,10 @@
 
 #include "Platforms/Common/mrt_platform.h"
 
+#define MONO_GFX_PIXEL_OFF 0
+#define MONO_GFX_PIXEL_ON 1
+#define MONO_GFX_PIXEL_INVERT 2
+
 struct mono_gfx_struct;
 typedef mrt_status_t (*f_mono_gfx_write_pixel)(struct mono_gfx_struct* gfx, int x, int y, uint8_t val);
 typedef mrt_status_t (*f_mono_gfx_write)(struct mono_gfx_struct* gfx, int x, int y, uint8_t* data, int len, bool wrap); //pointer to write function
@@ -102,9 +106,10 @@ mrt_status_t mono_gfx_write_buffer(mono_gfx_t* gfx, int x, int y, uint8_t* data,
   *@param x x coord to begin drawing at
   *@param y y coord to begin drawing at
   *@param bmp bitmap to draw
+  *@param val pixel value on
   *@return status of operation
   */
-mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y,const GFXBmp* bmp);
+mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y,const GFXBmp* bmp, uint8_t val);
 
 /**
   *@brief Draws rendered text to the buffer
@@ -112,9 +117,10 @@ mrt_status_t mono_gfx_draw_bmp(mono_gfx_t* gfx, int x, int y,const GFXBmp* bmp);
   *@param x x coord to begin drawing at
   *@param y y coord to begin drawing at
   *@param text text to be written
+  *@param val pixel value
   *@return status of operation
   */
-mrt_status_t mono_gfx_print(mono_gfx_t* gfx, int x, int y, const char * text);
+mrt_status_t mono_gfx_print(mono_gfx_t* gfx, int x, int y, const char * text, uint8_t val);
 
 /**
   *@brief draws a rectangle
@@ -123,9 +129,10 @@ mrt_status_t mono_gfx_print(mono_gfx_t* gfx, int x, int y, const char * text);
   *@param y0 y coord of p1
 	*@param x1 x coord of p2
   *@param y1 y coord of p2
+  *@param val pixel value
   *@return "Return of the function"
   */
-mrt_status_t mono_gfx_draw_line(mono_gfx_t* gfx, int x0, int y0, int x1, int y1);
+mrt_status_t mono_gfx_draw_line(mono_gfx_t* gfx, int x0, int y0, int x1, int y1, uint8_t val);
 
 /**
   *@brief draws a rectangle
@@ -134,6 +141,7 @@ mrt_status_t mono_gfx_draw_line(mono_gfx_t* gfx, int x0, int y0, int x1, int y1)
   *@param y y coord to begin drawing at
 	*@param w width
   *@param h height
+  *@param val pixel value
   *@return "Return of the function"
   */
 mrt_status_t mono_gfx_draw_rect(mono_gfx_t* gfx, int x, int y, int w, int h, uint8_t val);
